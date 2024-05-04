@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Department {
+  id    Int     @id @default(autoincrement())
+  name  String
+  nurse Nurse[] // OneToMany Relationship (Department has many Nurses)
+}
+
+//Users models
+model Nurse {
+  id         Int         @id @default(autoincrement())
+  paitents   Patient[] // OneToMany Relationship (Nurse has many Paitents)
+  department Department? @relation(fields: [depID], references: [id])
+  depID      Int?
+  createdAt  DateTime @default(now())
+  nationalID Int      @unique(map: "nationalID")
+  email      String?  @unique(map: "UserMail")
+  phone      Int?     @unique(map: "UserPhone")
+  name       String?
+}
+
+model Patient {
+  id         Int      @id @default(autoincrement())
+  nurse      Nurse?   @relation(fields: [nurseID], references: [id])
+  nurseID    Int?    
+  createdAt  DateTime @default(now())
+  nationalID Int      @unique(map: "nationalID")
+  email      String?  @unique(map: "UserMail")
+  phone      Int?     @unique(map: "UserPhone")
+  name       String?
+}
