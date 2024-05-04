@@ -37,6 +37,10 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
 };
 
 const updateDepartment = async (req: Request, res: Response): Promise<void> => {
+  interface Body {
+    name: string;
+    nurses: number[];
+  }
   try {
     const { error } = depSchema.validate(req.body);
     if (error) {
@@ -46,8 +50,17 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
+    const body: Body = await req.body;
     await prisma.department
-      .update({ where: req.params.id })
+      .update({
+        where: { id: parseInt(req.params.id) },
+        data: {
+          name: body.name,
+          nurse: {
+            connect: body.nurses.map((id) => ({ id })),
+          },
+        },
+      })
       .then((result) => {
         res.status(201).json({
           msg: "Success",
