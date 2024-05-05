@@ -28,3 +28,16 @@ A Health Care Project Using all of
 - Deploying using Docker
 
 This is the backend side of the Project
+
+There are Two Users which are (Patient and Nurse)
+Their Relation as follows
+
+- Patient has One Nurse OneToOne relationship
+- Nurse has Many Patients OneToMany relationships
+
+The Nurses have Departments
+Their Relation as Patient and Nurse
+
+Project API
+
+Patients
