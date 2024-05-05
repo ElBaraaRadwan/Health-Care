@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 model Department {
@@ -17,22 +18,26 @@ model Department {
 model Nurse {
   id         Int         @id @default(autoincrement())
   paitents   Patient[] // OneToMany Relationship (Nurse has many Paitents)
-  department Department? @relation(fields: [depID], references: [id])
+  department Department? @relation(fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   depID      Int?
   createdAt  DateTime    @default(now())
   nationalID Int         @unique(map: "nationalID")
   email      String?     @unique(map: "UserMail")
   phone      Int?        @unique(map: "UserPhone")
   name       String?
+
+  @@index([depID])
 }
 
 model Patient {
   id         Int      @id @default(autoincrement())
-  nurse      Nurse?   @relation(fields: [nurseID], references: [id])
+  nurse      Nurse?   @relation(fields: [nurseID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   nurseID    Int?
   createdAt  DateTime @default(now())
   nationalID Int      @unique(map: "nationalID")
   email      String?  @unique(map: "UserMail")
   phone      Int?     @unique(map: "UserPhone")
   name       String?
+
+  @@index([nurseID])
 }

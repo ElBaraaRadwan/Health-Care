@@ -24,7 +24,7 @@ const patientSchema = Joi.object({
 });
 const depSchema = Joi.object({
   name: Joi.string().max(52).required(),
-  nurses: Joi.array().unique("nurse.id").allow(null),
+  nurses: Joi.array().allow(null),
 });
 
 export { depSchema, nurseSchema, patientSchema };

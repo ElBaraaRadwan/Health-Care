@@ -1,43 +1,37 @@
-/\*
-TODO: MUST done in this Project
+# Health Care Project
 
-# Create REST API routes
+This is the backend side of the Health Care Project, built using Express/Typescript. It provides a REST API for managing patients, nurses, and departments.
 
-# Create an Authorization routes using JWT and Passport-JWT credentials
+## Features
 
-# Create an Authenticate routes using JOI
-
-# Create Jest to test the API routes
-
-# Create a Documentation using Postman
-
-# Upload Project & Documentation to Github
-
-# Deploy the project using Docker
-
-\*/
-
-A Health Care Project Using all of
-
-- Express/Typescript
-- REST API
 - Authentication using JOI
 - Authorization using JWT/Passport-JWT
 - Testing with Jest
-- Documenting using Postman
-- Deploying using Docker
+- Documentation using Postman
+- Deployment using Docker
 
-This is the backend side of the Project
+## API Endpoints
 
-There are Two Users which are (Patient and Nurse)
-Their Relation as follows
+### Patients
 
-- Patient has One Nurse OneToOne relationship
-- Nurse has Many Patients OneToMany relationships
+- `POST /ROOT/Patients/createPatient`: Create a new patient
+- `GET /ROOT/Patients/getAllPatients`: Get all patients
+- `GET /ROOT/Patients/getPatient/:id`: Get a specific patient by ID
+- `DELETE /ROOT/Patients/deletePatient/:id`: Delete a patient by ID
+- `PUT /ROOT/Patients/updatePatient/:id`: Update a patient by ID
 
-The Nurses have Departments
-Their Relation as Patient and Nurse
+### Nurses
 
-Project API
+- `POST /ROOT/Nurse/createNurse`: Create a new nurse
+- `GET /ROOT/Nurse/getAllNurses`: Get all nurses
+- `GET /ROOT/Nurse/getNurse/:id`: Get a specific nurse by ID
+- `DELETE /ROOT/Nurse/deleteNurse/:id`: Delete a nurse by ID
+- `PUT /ROOT/Nurse/updateNurse/:id`: Update a nurse by ID
 
-Patients
+### Departments
+
+- `GET /ROOT/Department/getAllDepartments`: Get all departments
+- `GET /ROOT/Department/getDepartment/:id`: Get a specific department by ID
+- `DELETE /ROOT/Department/deleteDepartment/:id`: Delete a department by ID
+- `PUT /ROOT/Department/updateDepartment/:id`: Update a department by ID
+- `POST /ROOT/Department/createDepartment`: Create a new department
