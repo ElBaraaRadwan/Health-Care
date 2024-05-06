@@ -6,8 +6,8 @@ import nurseRoutes from "./api/v1/users/nurse.routes";
 const app = express();
 
 const PORT = process.env.PORT || 8080;
-app.use(express.json());
 
+app.use(express.json());
 app.use("/department", depRoutes);
 app.use("/patient", patientRoutes);
 app.use("/nurse", nurseRoutes);

@@ -17,13 +17,13 @@ model Department {
 //Users models
 model Nurse {
   id         Int         @id @default(autoincrement())
-  paitents   Patient[] // OneToMany Relationship (Nurse has many Paitents)
+  patients   Patient[] // OneToMany Relationship (Nurse has many Paitents)
   department Department? @relation(fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   depID      Int?
   createdAt  DateTime    @default(now())
-  nationalID Int         @unique(map: "nationalID")
+  nationalID BigInt         @unique(map: "nationalID") @db.BigInt
   email      String?     @unique(map: "UserMail")
-  phone      Int?        @unique(map: "UserPhone")
+  phone      BigInt?        @unique(map: "UserPhone") @db.BigInt
   name       String?
 
   @@index([depID])
@@ -34,9 +34,9 @@ model Patient {
   nurse      Nurse?   @relation(fields: [nurseID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   nurseID    Int?
   createdAt  DateTime @default(now())
-  nationalID Int      @unique(map: "nationalID")
+  nationalID BigInt      @unique(map: "nationalID") @db.BigInt
   email      String?  @unique(map: "UserMail")
-  phone      Int?     @unique(map: "UserPhone")
+  phone      BigInt?     @unique(map: "UserPhone") @db.BigInt
   name       String?
 
   @@index([nurseID])
