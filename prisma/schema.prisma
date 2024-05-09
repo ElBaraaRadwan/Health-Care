@@ -3,41 +3,74 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
   relationMode = "prisma"
 }
 
-model Department {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique(map: "DepartmentName")
-  nurse Nurse[] // OneToMany Relationship (Department has many Nurses)
+// Models
+
+model User {
+  id   Int      @id @default(autoincrement())
+  role UserRole @default(Patient)
+
+  patient  Patient?
+  nurse    Nurse?
+  headDept headDept?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  nationalID   BigInt  @unique(map: "nationalID") @db.BigInt
+  email        String? @unique(map: "UserMail")
+  phone        BigInt? @unique(map: "UserPhone") @db.BigInt
+  name         String?
+  passwordHash String?
 }
 
-//Users models
+enum UserRole {
+  Patient
+  Nurse
+  headDept
+}
+
+//Users models (unchanged)
 model Nurse {
-  id         Int         @id @default(autoincrement())
   patients   Patient[] // OneToMany Relationship (Nurse has many Paitents)
   department Department? @relation(fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
   depID      Int?
-  createdAt  DateTime    @default(now())
-  nationalID BigInt         @unique(map: "nationalID") @db.BigInt
-  email      String?     @unique(map: "UserMail")
-  phone      BigInt?        @unique(map: "UserPhone") @db.BigInt
-  name       String?
+  isActive   Boolean     @default(false)
+  user       User        @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userID     Int         @unique
 
+  @@id([userID])
   @@index([depID])
 }
 
 model Patient {
-  id         Int      @id @default(autoincrement())
-  nurse      Nurse?   @relation(fields: [nurseID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  nurseID    Int?
-  createdAt  DateTime @default(now())
-  nationalID BigInt      @unique(map: "nationalID") @db.BigInt
-  email      String?  @unique(map: "UserMail")
-  phone      BigInt?     @unique(map: "UserPhone") @db.BigInt
-  name       String?
+  nurse   Nurse? @relation(fields: [nurseID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
+  nurseID Int?
+  user    User   @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userID  Int    @unique
 
+  @@id([userID])
   @@index([nurseID])
+}
+
+model headDept {
+  user       User        @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userID     Int         @unique
+  department Department?
+  depID      Int         @unique
+
+  @@id([userID])
+  @@index([depID])
+}
+
+model Department {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique(map: "DepartmentName")
+  nurses     Nurse[] // OneToMany Relationship (Department has many Nurses)
+  headDept   headDept? @relation(fields: [headDeptID], references: [userID], onDelete: SetNull)
+  headDeptID Int?      @unique
 }

@@ -1,22 +1,22 @@
-import { Router } from "express";
-import {
-  createNurse,
-  updateNurse,
-  deleteNurse,
-  getNurse,
-  getNurses,
-} from "../../../controllers/users/nurseControl";
+// import { Router } from "express";
+// import {
+//   createNurse,
+//   updateNurse,
+//   deleteNurse,
+//   getNurse,
+//   getNurses,
+// } from "../../../controllers/v1/users/nurseControl";
 
-const router = Router();
+// const router = Router();
 
-router.get("/getNurse/:id", getNurse);
+// router.get("/getNurse/:id", getNurse);
 
-router.post("/createNurse", createNurse);
+// router.post("/createNurse", createNurse);
 
-router.put("/updateNurse/:id", updateNurse);
+// router.put("/updateNurse/:id", updateNurse);
 
-router.delete("/deleteNurse/:id", deleteNurse);
+// router.delete("/deleteNurse/:id", deleteNurse);
 
-router.get("/getAllNurses", getNurses);
+// router.get("/getAllNurses", getNurses);
 
-export default router;
+// export default router;
