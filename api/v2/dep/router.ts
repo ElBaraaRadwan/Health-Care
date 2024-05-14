@@ -1,22 +1,22 @@
-// import { Router } from "express";
-// import {
-//   createDepartment,
-//   updateDepartment,
-//   deleteDepartment,
-//   getDepartments,
-//   getDepartment,
-// } from "../../../controllers/v1/dep/control";
+import { Router } from "express";
+import {
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  getDepartments,
+  getDepartment,
+} from "../../../controllers/v2/dep/control";
 
-// const router = Router();
+const router = Router();
 
-// router.get("/getDepartment/:id", getDepartment);
+router.get("/getDepartment/:id", getDepartment);
 
-// router.post("/createDepartment", createDepartment);
+router.post("/createDepartment", createDepartment);
 
-// router.put("/updateDepartment/:id", updateDepartment);
+router.put("/updateDepartment/:id", updateDepartment);
 
-// router.delete("/deleteDepartment/:id", deleteDepartment);
+router.delete("/deleteDepartment/:id", deleteDepartment);
 
-// router.get("/getAllDepartments", getDepartments);
+router.get("/getAllDepartments", getDepartments);
 
-// export default router;
+export default router;

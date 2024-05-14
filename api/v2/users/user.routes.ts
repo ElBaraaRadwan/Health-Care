@@ -5,6 +5,7 @@ import {
   deleteUser,
   getUser,
   getUsers,
+  getUsersByRole,
 } from "../../../controllers/v2/users/UserControl";
 
 const router = Router();
@@ -18,5 +19,7 @@ router.put("/updateUser/:id", updateUser);
 router.delete("/deleteUser/:id", deleteUser);
 
 router.get("/getAllUsers", getUsers);
+
+router.get("/getUsersByRole/:role", getUsersByRole);
 
 export default router;

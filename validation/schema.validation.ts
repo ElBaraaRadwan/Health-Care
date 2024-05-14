@@ -56,7 +56,7 @@ const userSchema = Joi.object({
       "any.required": `Password is required`,
     }),
   role: Joi.string()
-    .valid("Patient", "Nurse", "headDept")
+    .valid("PATIENT", "NURSE", "HEADDEPT")
     .uppercase()
     .required(),
   // data: Joi.when("role", {         //TODO: see if using when method is passible

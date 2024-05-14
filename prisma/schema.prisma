@@ -12,11 +12,11 @@ datasource db {
 
 model User {
   id   Int      @id @default(autoincrement())
-  role UserRole @default(Patient)
+  type UserRole @default(PATIENT)
 
-  patient  Patient?
-  nurse    Nurse?
-  headDept headDept?
+  patientRelations  Patient?
+  nurseRelations    Nurse?
+  headDeptRelations headDept?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -29,48 +29,48 @@ model User {
 }
 
 enum UserRole {
-  Patient
-  Nurse
-  headDept
+  PATIENT
+  NURSE
+  HEADDEPT
 }
 
 //Users models (unchanged)
 model Nurse {
   patients   Patient[] // OneToMany Relationship (Nurse has many Paitents)
-  department Department? @relation(fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  depID      Int?
-  isActive   Boolean     @default(false)
-  user       User        @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userID     Int         @unique
+  department Department @relation("NurseToDept", fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  depID      Int
+  isActive   Boolean?   @default(true)
+  user       User       @relation(fields: [nurseID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  nurseID    Int        @unique
 
-  @@id([userID])
+  @@id([nurseID])
   @@index([depID])
 }
 
 model Patient {
-  nurse   Nurse? @relation(fields: [nurseID], references: [userID], onDelete: Cascade, onUpdate: Cascade)
-  nurseID Int?
-  user    User   @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userID  Int    @unique
+  nurse     Nurse @relation(fields: [nurseID], references: [nurseID], onDelete: Cascade, onUpdate: Cascade)
+  nurseID   Int
+  user      User  @relation(fields: [patientID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  patientID Int   @unique
 
-  @@id([userID])
+  @@id([patientID])
   @@index([nurseID])
 }
 
 model headDept {
-  user       User        @relation(fields: [userID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userID     Int         @unique
+  user       User        @relation(fields: [headDepID], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  headDepID  Int         @unique
   department Department?
   depID      Int         @unique
 
-  @@id([userID])
+  @@id([headDepID])
   @@index([depID])
 }
 
 model Department {
   id         Int       @id @default(autoincrement())
   name       String    @unique(map: "DepartmentName")
-  nurses     Nurse[] // OneToMany Relationship (Department has many Nurses)
-  headDept   headDept? @relation(fields: [headDeptID], references: [userID], onDelete: SetNull)
+  nurses     Nurse[]   @relation("NurseToDept") // OneToMany Relationship (Department has many Nurses)
+  headDept   headDept? @relation(fields: [headDeptID], references: [headDepID], onDelete: SetNull)
   headDeptID Int?      @unique
 }

@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 async function hashPassword(password: string): Promise<string> {
   "Hashes a password using bcrypt.";
   // Generate a random salt
-  const salt = await bcrypt.genSalt(10);
+  const salt = await bcrypt.genSalt(10, "a");
   // Hash the password with the salt
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;

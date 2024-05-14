@@ -6,20 +6,20 @@ import handleError from "../../../lib/handleError";
 
 interface Body {
   name: string;
-  headDep: number;
-  nurses: number[];
+  headDep?: number;
+  nurses?: number[];
 }
 
 const createDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
     const body: Body = await req.body;
-    if (!(await prisma.department.findUnique({ where: { name: body.name } }))) {
+    if (await prisma.department.findUnique({ where: { name: body.name } })) {
       res.status(400).json({
         msg: "Department already exists",
       });
       return;
     }
-    const { error } = depSchema.validate(req.body);
+    const { error } = depSchema.validate(body);
     if (error) {
       res.status(400).json({
         msg: "Error",
@@ -32,7 +32,7 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
         data: {
           name: body.name,
           headDeptID: body.headDep,
-          nurses: { connect: addId(body.nurses) },
+          nurses: { connect: addId(body.nurses || []) },
         },
       })
       .then((result) => {
@@ -49,8 +49,8 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
 
 const updateDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body: Body = req.body;
     const id: number = +req.params.id;
+    const body: Body = await req.body;
     if (!(await prisma.department.findUnique({ where: { id } }))) {
       res.status(400).json({
         msg: `Department with id: ${id} Does not exist`,
@@ -72,7 +72,7 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
           name: body.name,
           headDeptID: body.headDep,
           nurses: {
-            connect: addId(body.nurses),
+            connect: addId(body.nurses || []),
           },
         },
       })

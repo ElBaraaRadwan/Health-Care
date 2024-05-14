@@ -8,7 +8,7 @@ function handleError(error: Error, res: Response): void {
   if (error instanceof PrismaClientKnownRequestError) {
     switch (error.code) {
       case "P2002": // Unique constraint violation (e.g., name already exists)
-        message = "Name already exists.";
+        message = "already exists.";
         statusCode = 400;
         break;
       case "P2001": // Foreign key constraint violation (e.g., connecting non-existent)
