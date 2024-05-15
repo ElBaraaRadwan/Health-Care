@@ -5,7 +5,7 @@ import {
   deleteDepartment,
   getDepartments,
   getDepartment,
-} from "../../../controllers/v2/dep/control";
+} from "../../controllers/dep/control";
 
 const router = Router();
 

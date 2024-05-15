@@ -1,21 +1,5 @@
 import Joi from "joi";
 
-const nurseSchema = Joi.object({
-  depID: Joi.number().allow(null),
-  patients: Joi.array().items(Joi.number()).max(5).allow(null).messages({
-    "number.max": "Nurse Can't Take More than 5 Patients.",
-  }),
-  isActive: Joi.boolean().allow(null).default(false),
-});
-
-const patientSchema = Joi.object({
-  nurseID: Joi.number().allow(null),
-});
-
-const Head_DepartmentSchema = Joi.object({
-  depID: Joi.number().allow(null),
-});
-
 const userSchema = Joi.object({
   name: Joi.string().alphanum().min(3).max(30).required().messages({
     "any.required": "name is required.",
@@ -59,21 +43,6 @@ const userSchema = Joi.object({
     .valid("PATIENT", "NURSE", "HEADDEPT")
     .uppercase()
     .required(),
-  // data: Joi.when("role", {         //TODO: see if using when method is passible
-  //   is: "PATIENT",
-  //   then: patientSchema.required(),
-  //   otherwise: patientSchema,
-  // })
-  //   .when("role", {
-  //     is: "NURSE",
-  //     then: nurseSchema.required(),
-  //     otherwise: nurseSchema,
-  //   })
-  //   .when("role", {
-  //     is: "HEADDEPT",
-  //     then: Head_DepartmentSchema.required(),
-  //     otherwise: Head_DepartmentSchema,
-  //   }),
 });
 
 const depSchema = Joi.object({
@@ -90,4 +59,30 @@ const depSchema = Joi.object({
   }),
 });
 
-export { depSchema, userSchema };
+const medValidation = Joi.object({
+  name: Joi.string().alphanum().min(3).max(30).required().messages({
+    "any.required": "name is required.",
+    "string.empty": "name cannot be empty.",
+    "string.min": "name should be at least 3 characters long.",
+    "string.max": "name should not exceed 30 characters.",
+    "string.alphanum": "name should only contain alphanumeric characters.",
+  }),
+  dosage: Joi.string(),
+});
+
+const programValidation = Joi.object({
+  name: Joi.string().alphanum().min(3).max(30).required().messages({
+    "any.required": "name is required.",
+    "string.empty": "name cannot be empty.",
+    "string.min": "name should be at least 3 characters long.",
+    "string.max": "name should not exceed 30 characters.",
+    "string.alphanum": "name should only contain alphanumeric characters.",
+  }),
+  potentialProblems: Joi.string(),
+  preventionAndTherapies: Joi.string(),
+  diagnosticTestsAndMonitoring: Joi.string(),
+  medications: Joi.array().items(medValidation).max(10).allow(null),
+  duration: Joi.date(),
+});
+
+export { depSchema, userSchema, programValidation };

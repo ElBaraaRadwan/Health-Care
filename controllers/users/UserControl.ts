@@ -1,10 +1,9 @@
-import prisma from "../../../lib/prisma";
 import { Request, Response } from "express";
-import { userSchema } from "../../../validation/schema.validation";
-import { Stringify } from "../../../lib/Helper";
-import handleError from "../../../lib/handleError";
-import { hashPassword } from "../../../lib/passwordHash";
-import { $Enums } from "@prisma/client";
+import { userSchema } from "../../validation/schema.validation";
+import { Stringify } from "../../lib/Helper";
+import handleError from "../../lib/handleError";
+import { hashPassword } from "../../lib/passwordHash";
+import { $Enums, PrismaClient } from "@prisma/client";
 
 interface Body {
   name: string;
@@ -12,8 +11,11 @@ interface Body {
   email: string;
   nationalID: number;
   password: string;
-  type: string;
+  role: string;
+  gender: string;
 }
+
+const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -27,7 +29,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    const { error } = userSchema.validate(req.body);
+    const { error } = userSchema.validate(body);
     if (error) {
       res.status(400).json({
         msg: "Error",
@@ -36,7 +38,6 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     const hashedPassword = await hashPassword(body.password);
-    const type = body.type.toUpperCase() as $Enums.UserRole;
     await prisma.user
       .create({
         data: {
@@ -45,7 +46,8 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
           email: body.email,
           nationalID: body.nationalID,
           passwordHash: hashedPassword,
-          type,
+          role: body.role.toLowerCase() as $Enums.Role,
+          gender: body.gender.toUpperCase() as $Enums.Gender,
         },
       })
       .then((result) => {
@@ -82,14 +84,15 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
     await prisma.user
       .update({
         where: {
-          id: +req.params.id,
+          id: req.params.id,
         },
         data: {
           name: body.name,
           phone: body.phone,
           email: body.email,
           nationalID: body.nationalID,
-          type: body.type.toUpperCase() as $Enums.UserRole,
+          role: body.role.toUpperCase() as $Enums.Role,
+          gender: body.gender.toUpperCase() as $Enums.Gender,
         },
       })
       .then((result) => {
@@ -108,7 +111,7 @@ const updateUser = async (req: Request, res: Response): Promise<void> => {
 
 const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    if (!(await prisma.user.findUnique({ where: { id: +req.params.id } }))) {
+    if (!(await prisma.user.findUnique({ where: { id: req.params.id } }))) {
       res.status(404).json({
         msg: `user with id: ${+req.params.id} Does not exist`,
       });
@@ -117,7 +120,7 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
     await prisma.user
       .delete({
         where: {
-          id: +req.params.id,
+          id: req.params.id,
         },
       })
       .then((result) => {
@@ -134,18 +137,17 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
 
 const getUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const id: number = +req.params.id;
-    const test = await prisma.user.findUnique({ where: { id } });
+    const test = await prisma.user.findUnique({ where: { id: req.params.id } });
     if (!test) {
       res.status(404).json({
-        msg: `user with id: ${id} Does not exist`,
+        msg: `user with id: ${req.params.id} Does not exist`,
       });
       return;
     }
     await prisma.user
       .findUnique({
         where: {
-          id: +req.params.id,
+          id: req.params.id,
         },
       })
       .then((result) => {
@@ -168,17 +170,17 @@ const getUsers = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
-  const type = req.params.type.toUpperCase() as $Enums.UserRole;
-  if (!type) {
-    res.status(400).json(`${type} is Invalid role`);
+  const role = req.params.role.toLowerCase() as $Enums.Role;
+  if (!role) {
+    res.status(400).json(`${role} is Invalid role`);
     return;
   }
-  switch (type) {
-    case "PATIENT":
+  switch (role) {
+    case "patient":
       await prisma.user
         .findMany({
-          where: { type },
-          include: { patientRelations: true },
+          where: { role },
+          include: { patientPrograms: true, allergies: true },
         })
         .then((result) => {
           if (!result) {
@@ -190,11 +192,11 @@ const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
           return;
         });
       break;
-    case "NURSE":
+    case "nurse":
       await prisma.user
         .findMany({
-          where: { type },
-          include: { nurseRelations: true },
+          where: { role },
+          include: { nursePrograms: true, nurseDepartments: true },
         })
         .then((result) => {
           if (!result) {
@@ -207,11 +209,11 @@ const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
         });
       break;
 
-    case "HEADDEPT":
+    case "headdept":
       await prisma.user
         .findMany({
-          where: { type },
-          include: { headDeptRelations: true },
+          where: { role },
+          include: { headDeptDepartment: true },
         })
         .then((result) => {
           if (!result) {

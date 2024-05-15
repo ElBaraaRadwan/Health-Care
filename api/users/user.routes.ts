@@ -6,7 +6,7 @@ import {
   getUser,
   getUsers,
   getUsersByRole,
-} from "../../../controllers/v2/users/UserControl";
+} from "../../controllers/users/UserControl";
 
 const router = Router();
 

@@ -1,14 +1,16 @@
-import prisma from "../../../lib/prisma";
+import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { depSchema } from "../../../validation/schema.validation";
-import { Stringify, addId } from "../../../lib/Helper";
-import handleError from "../../../lib/handleError";
+import { depSchema } from "../../validation/schema.validation";
+import { Stringify, addId } from "../../lib/Helper";
+import handleError from "../../lib/handleError";
 
 interface Body {
   name: string;
-  headDep?: number;
-  nurses?: number[];
+  headDeptID?: string;
+  nurses?: string[];
 }
+
+const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 const createDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -31,7 +33,7 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
       .create({
         data: {
           name: body.name,
-          headDeptID: body.headDep,
+          headDeptID: body.headDeptID,
           nurses: { connect: addId(body.nurses || []) },
         },
       })
@@ -70,10 +72,8 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
         where: { id: +req.params.id },
         data: {
           name: body.name,
-          headDeptID: body.headDep,
-          nurses: {
-            connect: addId(body.nurses || []),
-          },
+          headDeptID: body.headDeptID,
+          nurses: { connect: addId(body.nurses || []) }, // TODO: the ability to remove nurse on update
         },
       })
       .then((updatedData) => {
