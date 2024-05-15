@@ -8,69 +8,81 @@ datasource db {
   relationMode = "prisma"
 }
 
-// Models
+enum Role {
+  patient
+  nurse
+  headdept
+}
+
+enum Gender {
+  FEMALE
+  MALE
+}
 
 model User {
-  id   Int      @id @default(autoincrement())
-  type UserRole @default(PATIENT)
+  id              Int       @id @default(autoincrement())
+  name            String
+  email           String?   @unique
+  nationalID      BigInt    @unique @db.BigInt
+  phone           BigInt?   @unique @db.BigInt
+  passwordHash    String
+  role            Role
+  gender          Gender?
+  allergies       Allergy[]
+  nursePrograms   Program[] @relation("nursePrograms")
+  patientPrograms Program[] @relation("patientPrograms")
 
-  patientRelations  Patient?
-  nurseRelations    Nurse?
-  headDeptRelations headDept?
+  nurseDepartments Department? @relation("NurseToDept", fields: [departmentId], references: [id])
+  departmentId     Int?
 
+  headDeptDepartment Department? @relation("HeadDeptDepartment")
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@index([departmentId])
+}
+
+model Program {
+  id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  nationalID   BigInt  @unique(map: "nationalID") @db.BigInt
-  email        String? @unique(map: "UserMail")
-  phone        BigInt? @unique(map: "UserPhone") @db.BigInt
-  name         String?
-  passwordHash String?
-}
-
-enum UserRole {
-  PATIENT
-  NURSE
-  HEADDEPT
-}
-
-//Users models (unchanged)
-model Nurse {
-  patients   Patient[] // OneToMany Relationship (Nurse has many Paitents)
-  department Department @relation("NurseToDept", fields: [depID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  depID      Int
-  isActive   Boolean?   @default(true)
-  user       User       @relation(fields: [nurseID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  nurseID    Int        @unique
-
-  @@id([nurseID])
-  @@index([depID])
-}
-
-model Patient {
-  nurse     Nurse @relation(fields: [nurseID], references: [nurseID], onDelete: Cascade, onUpdate: Cascade)
-  nurseID   Int
-  user      User  @relation(fields: [patientID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  patientID Int   @unique
-
-  @@id([patientID])
-  @@index([nurseID])
-}
-
-model headDept {
-  user       User        @relation(fields: [headDepID], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  headDepID  Int         @unique
-  department Department?
-  depID      Int         @unique
-
-  @@id([headDepID])
-  @@index([depID])
+  name                         String       @unique
+  potentialProblems            String
+  preventionAndTherapies       String
+  medications                  Medication[]
+  diagnosticTestsAndMonitoring String
+  duration                     DateTime
+  patients                     User[]       @relation("patientPrograms")
+  nurses                       User[]       @relation("nursePrograms")
 }
 
 model Department {
-  id         Int       @id @default(autoincrement())
-  name       String    @unique(map: "DepartmentName")
-  nurses     Nurse[]   @relation("NurseToDept") // OneToMany Relationship (Department has many Nurses)
-  headDept   headDept? @relation(fields: [headDeptID], references: [headDepID], onDelete: SetNull)
-  headDeptID Int?      @unique
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  nurses User[] @relation("NurseToDept") // OneToMany Relationship (Department has many Nurses)
+
+  headDept   User?    @relation("HeadDeptDepartment", fields: [headDeptID], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  headDeptID Int?     @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([headDeptID])
+}
+
+model Medication {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  dosage    String
+  program   Program @relation(fields: [programId], references: [id])
+  programId Int
+
+  @@index([programId])
+}
+
+model Allergy {
+  id          Int    @id @default(autoincrement())
+  name        String @unique
+  sideEffects String
+  users       User[]
 }
