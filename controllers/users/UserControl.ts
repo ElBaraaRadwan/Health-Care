@@ -7,9 +7,9 @@ import { $Enums, PrismaClient } from "@prisma/client";
 
 interface Body {
   name: string;
-  phone: number;
+  phone: string;
   email: string;
-  nationalID: number;
+  nationalID: string;
   password: string;
   role: string;
   gender: string;
