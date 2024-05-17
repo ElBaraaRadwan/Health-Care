@@ -25,7 +25,7 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
     });
     if (checkIfExists) {
       res.status(400).json({
-        msg: `user with ID:${body.nationalID} already exists`,
+        msg: `user with NationalID:${body.nationalID} already exists`,
       });
       return;
     }
@@ -113,7 +113,7 @@ const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!(await prisma.user.findUnique({ where: { id: req.params.id } }))) {
       res.status(404).json({
-        msg: `user with id: ${+req.params.id} Does not exist`,
+        msg: `user with id: ${req.params.id} Does not exist`,
       });
       return;
     }
@@ -180,7 +180,7 @@ const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
       await prisma.user
         .findMany({
           where: { role },
-          include: { patientPrograms: true, allergies: true },
+          include: { patientPrograms: true },
         })
         .then((result) => {
           if (!result) {

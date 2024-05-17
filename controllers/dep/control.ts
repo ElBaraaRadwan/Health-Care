@@ -33,14 +33,15 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
       .create({
         data: {
           name: body.name,
-          headDeptID: body.headDeptID,
+          headDept: { connect: { id: body.headDeptID } },
           nurses: { connect: addId(body.nurses || []) },
         },
+        include: { nurses: true, headDept: true },
       })
       .then((result) => {
         res.status(201).json({
           msg: "Successfully created department",
-          result,
+          result: Stringify(result),
         });
       });
   } catch (error) {
@@ -53,7 +54,11 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
     const id: number = +req.params.id;
     const body: Body = await req.body;
-    if (!(await prisma.department.findUnique({ where: { id } }))) {
+    const department = await prisma.department.findUnique({
+      where: { id },
+      include: { nurses: true, headDept: true },
+    });
+    if (!department) {
       res.status(400).json({
         msg: `Department with id: ${id} Does not exist`,
       });
@@ -67,19 +72,72 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
+
     await prisma.department
       .update({
         where: { id: +req.params.id },
         data: {
-          name: body.name,
-          headDeptID: body.headDeptID,
-          nurses: { connect: addId(body.nurses || []) }, // TODO: the ability to remove nurse on update
+          ...body,
+          nurses: { connect: addId(body.nurses || []) },
         },
+        include: { nurses: true, headDept: { where: { id: body.headDeptID } } },
       })
       .then((updatedData) => {
         res.status(201).json({
           msg: "Successfully updated department",
-          updatedData,
+          result: Stringify(updatedData),
+        });
+      });
+  } catch (error) {
+    const err: Error = error as Error;
+    handleError(err, res);
+  }
+};
+
+const disconnectFromDep = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const { depID, nurseID, headID } = req.query;
+  if (depID === undefined) {
+    res.status(400).json({
+      msg: "Missing depID",
+    });
+    return;
+  } else if (!nurseID && !headID) {
+    res.status(400).json({
+      msg: "Missing nurseID or headID",
+    });
+    return;
+  }
+  const dep: number = +depID;
+  const headId: string = headID?.toString() ?? "";
+  const nurseId: string = nurseID?.toString() ?? "";
+  try {
+    // const id: number = +req.params.id;
+    const department = await prisma.department.findUnique({
+      where: { id: dep },
+      include: { nurses: true, headDept: true },
+    });
+    if (!department) {
+      res.status(400).json({
+        msg: `Department with id: ${dep} Does not exist`,
+      });
+      return;
+    }
+    await prisma.department
+      .update({
+        where: { id: dep },
+        data: {
+          headDept: { disconnect: { id: headId } },
+          nurses: { disconnect: { id: nurseId } },
+        },
+        include: { nurses: true, headDept: true },
+      })
+      .then((updatedData) => {
+        res.status(201).json({
+          msg: "Successfully disconnected from department",
+          result: Stringify(updatedData),
         });
       });
   } catch (error) {
@@ -101,6 +159,7 @@ const deleteDepartment = async (req: Request, res: Response): Promise<void> => {
       where: {
         id,
       },
+      include: { nurses: true, headDept: true },
     });
     res.status(201).json({
       msg: `Successfully deleted department`,
@@ -157,4 +216,5 @@ export {
   deleteDepartment,
   getDepartment,
   getDepartments,
+  disconnectFromDep,
 };

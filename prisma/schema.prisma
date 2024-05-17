@@ -20,15 +20,15 @@ enum Gender {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
+  id              String    @id @default(uuid())
   name            String
   email           String?   @unique
-  nationalID      BigInt    @unique @db.BigInt
-  phone           BigInt?   @unique @db.BigInt
+  nationalID      String    @unique 
+  phone           String?   @unique 
   passwordHash    String
   role            Role
   gender          Gender?
-  allergies       Allergy[]
+  allergies       Json?     @db.Json
   nursePrograms   Program[] @relation("nursePrograms")
   patientPrograms Program[] @relation("patientPrograms")
 
@@ -47,14 +47,14 @@ model Program {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name                         String       @unique
-  potentialProblems            String
-  preventionAndTherapies       String
-  medications                  Medication[]
-  diagnosticTestsAndMonitoring String
+  name                         String   @unique
+  potentialProblems            Json?    @db.Json
+  preventionAndTherapies       Json?    @db.Json
+  medications                  Json?    @db.Json
+  diagnosticTestsAndMonitoring Json?    @db.Json
   duration                     DateTime
-  patients                     User[]       @relation("patientPrograms")
-  nurses                       User[]       @relation("nursePrograms")
+  patients                     User[]   @relation("patientPrograms")
+  nurses                       User[]   @relation("nursePrograms")
 }
 
 model Department {
@@ -63,26 +63,26 @@ model Department {
   nurses User[] @relation("NurseToDept") // OneToMany Relationship (Department has many Nurses)
 
   headDept   User?    @relation("HeadDeptDepartment", fields: [headDeptID], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  headDeptID Int?     @unique
+  headDeptID String?  @unique
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   @@index([headDeptID])
 }
 
-model Medication {
-  id        Int     @id @default(autoincrement())
-  name      String  @unique
-  dosage    String
-  program   Program @relation(fields: [programId], references: [id])
-  programId Int
+// model Medication {
+//   id        Int     @id @default(autoincrement())
+//   name      String  @unique
+//   dosage    String
+//   program   Program @relation(fields: [programId], references: [id])
+//   programId Int
 
-  @@index([programId])
-}
+//   @@index([programId])
+// }
 
-model Allergy {
-  id          Int    @id @default(autoincrement())
-  name        String @unique
-  sideEffects String
-  users       User[]
-}
+// model Allergy {
+//   id          Int    @id @default(autoincrement())
+//   name        String @unique
+//   sideEffects String
+//   users       User[]
+// }
