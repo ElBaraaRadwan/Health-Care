@@ -7,14 +7,15 @@ import {
   getUsers,
   getUsersByRole,
 } from "../../controllers/users/UserControl";
+import { validateUser } from "../../middleware/validate";
 
 const router = Router();
 
 router.get("/getUser/:id", getUser);
 
-router.post("/createUser", createUser);
+router.post("/createUser", validateUser, createUser);
 
-router.put("/updateUser/:id", updateUser);
+router.put("/updateUser/:id", validateUser, updateUser);
 
 router.delete("/deleteUser/:id", deleteUser);
 

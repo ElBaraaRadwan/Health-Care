@@ -1,22 +1,14 @@
 import { Request, Response } from "express";
-import { allergiesValidation } from "../../validation/schema.validation";
 import { Stringify, delValue } from "../../lib/Helper";
 import handleError from "../../lib/handleError";
 import { PrismaClient, Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient({ errorFormat: "pretty" });
 
-interface Allergies {
-  [name: string]: {
-    sideEffects: string[];
-    severity: string;
-  };
-}
-
 const setAllergy = async (req: Request, res: Response): Promise<void> => {
   try {
     const id: string = req.params.id;
-    const body: Allergies = await req.body;
+    const body = await req.body;
     const patient = await prisma.user.findUnique({ where: { id } });
     if (patient?.role !== "patient") {
       res.status(400).json({
@@ -27,14 +19,6 @@ const setAllergy = async (req: Request, res: Response): Promise<void> => {
     if (!patient) {
       res.status(400).json({
         msg: `Patient with id: ${id} Does not exist`,
-      });
-      return;
-    }
-    const { error } = allergiesValidation.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
       });
       return;
     }
@@ -69,9 +53,6 @@ const setAllergy = async (req: Request, res: Response): Promise<void> => {
 };
 
 const delAllergy = async (req: Request, res: Response): Promise<void> => {
-  // const ids = req.params.ids.split("&");
-  // const id: string = ids[0];
-  // const allergy: string = ids[1];
   const { allergy, userID } = req.query;
   if (!allergy || !userID) {
     res.status(400).json({

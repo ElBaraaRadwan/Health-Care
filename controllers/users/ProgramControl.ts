@@ -1,20 +1,9 @@
 import { Request, Response } from "express";
-import { programValidation } from "../../validation/schema.validation";
 import { Stringify } from "../../lib/Helper";
 import handleError from "../../lib/handleError";
 import { PrismaClient } from "@prisma/client";
-// import { URLSearchParams } from "url";
 
 const prisma = new PrismaClient({ errorFormat: "pretty" });
-
-interface Program {
-  name: string;
-  potentialProblems: object;
-  preventionAndTherapies: object;
-  medications: object;
-  diagnosticTestsAndMonitoring: object;
-  duration: Date;
-}
 
 const assignProgramToPatient = async (
   req: Request,
@@ -74,7 +63,7 @@ const assignProgramToPatient = async (
   }
 };
 
-const modifyProgram = async (req: Request, res: Response): Promise<void> => {
+const updateProgram = async (req: Request, res: Response): Promise<void> => {
   const { programID } = req.query;
   if (!programID) {
     res.status(400).json({
@@ -84,7 +73,7 @@ const modifyProgram = async (req: Request, res: Response): Promise<void> => {
   }
   const programId: number = +programID;
   try {
-    const body: Program = await req.body;
+    const body = await req.body;
     const program = await prisma.program.findUnique({
       where: { id: programId },
     });
@@ -94,14 +83,7 @@ const modifyProgram = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    const { error } = programValidation.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
-      });
-      return;
-    }
+
     await prisma.program
       .update({
         where: { id: programId },
@@ -128,15 +110,7 @@ const modifyProgram = async (req: Request, res: Response): Promise<void> => {
 
 const createProgram = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body: Program = await req.body;
-    const { error } = programValidation.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
-      });
-      return;
-    }
+    const body = await req.body;
     const check = await prisma.program.findFirst({
       where: { name: body.name },
     });
@@ -285,7 +259,7 @@ const getPrograms = async (req: Request, res: Response): Promise<void> => {
 export {
   assignNurseToProgram,
   assignProgramToPatient,
-  modifyProgram,
+  updateProgram,
   createProgram,
   deleteProgram,
   getProgram,

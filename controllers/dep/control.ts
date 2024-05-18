@@ -1,34 +1,21 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { depSchema } from "../../validation/schema.validation";
+import { Department, validateDepartment } from "../../middleware/validate";
 import { Stringify, addId } from "../../lib/Helper";
 import handleError from "../../lib/handleError";
-
-interface Body {
-  name: string;
-  headDeptID?: string;
-  nurses?: string[];
-}
 
 const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 const createDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body: Body = await req.body;
+    const body: Department = await req.body;
     if (await prisma.department.findUnique({ where: { name: body.name } })) {
       res.status(400).json({
         msg: "Department already exists",
       });
       return;
     }
-    const { error } = depSchema.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
-      });
-      return;
-    }
+    validateDepartment(req, res, body);
     await prisma.department
       .create({
         data: {
@@ -53,7 +40,7 @@ const createDepartment = async (req: Request, res: Response): Promise<void> => {
 const updateDepartment = async (req: Request, res: Response): Promise<void> => {
   try {
     const id: number = +req.params.id;
-    const body: Body = await req.body;
+    const body: Department = await req.body;
     const department = await prisma.department.findUnique({
       where: { id },
       include: { nurses: true, headDept: true },
@@ -64,14 +51,7 @@ const updateDepartment = async (req: Request, res: Response): Promise<void> => {
       });
       return;
     }
-    const { error } = depSchema.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
-      });
-      return;
-    }
+    validateDepartment(req, res, body);
 
     await prisma.department
       .update({

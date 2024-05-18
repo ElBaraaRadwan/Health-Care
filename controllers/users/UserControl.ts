@@ -1,39 +1,20 @@
 import { Request, Response } from "express";
-import { userSchema } from "../../validation/schema.validation";
 import { Stringify } from "../../lib/Helper";
 import handleError from "../../lib/handleError";
 import { hashPassword } from "../../lib/passwordHash";
 import { $Enums, PrismaClient } from "@prisma/client";
 
-interface Body {
-  name: string;
-  phone: string;
-  email: string;
-  nationalID: string;
-  password: string;
-  role: string;
-  gender: string;
-}
-
 const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body: Body = await req.body;
+    const body = await req.body;
     const checkIfExists = await prisma.user.findUnique({
       where: { nationalID: body.nationalID },
     });
     if (checkIfExists) {
       res.status(400).json({
         msg: `user with NationalID:${body.nationalID} already exists`,
-      });
-      return;
-    }
-    const { error } = userSchema.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
       });
       return;
     }
@@ -63,15 +44,8 @@ const createUser = async (req: Request, res: Response): Promise<void> => {
 
 const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const body: Body = await req.body;
-    const { error } = userSchema.validate(body);
-    if (error) {
-      res.status(400).json({
-        msg: "Error",
-        data: error.details[0].message,
-      });
-      return;
-    }
+    const body = await req.body;
+
     const checkIfExists = await prisma.user.findUnique({
       where: { nationalID: body.nationalID },
     });
