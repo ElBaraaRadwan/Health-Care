@@ -3,6 +3,7 @@ import {
   userSchema,
   programValidation,
   allergiesValidation,
+  signSchema,
 } from "../validation/schema.validation";
 import { Request, Response, NextFunction } from "express";
 
@@ -37,6 +38,27 @@ interface Department {
   headDeptID?: string;
   nurses?: string[];
 }
+
+interface Login {
+  email: string;
+  password: string;
+}
+
+const validateSignIn = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  let body: Login = req.body;
+  const { error } = signSchema.validate(body);
+  if (error) {
+    res.status(400).json({
+      msg: error.details[0].message,
+    });
+    return;
+  }
+  return next();
+};
 
 const validateAllergy = (
   req: Request,
@@ -102,5 +124,10 @@ const validateProgram = (
   return next();
 };
 
-export { validateAllergy, validateDepartment, validateProgram, validateUser };
-export type { Allergies, User, Department, Program };
+export {
+  validateAllergy,
+  validateDepartment,
+  validateProgram,
+  validateUser,
+  validateSignIn,
+};

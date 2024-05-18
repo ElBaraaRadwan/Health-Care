@@ -1,19 +1,22 @@
 import { Router } from "express";
 import {
-  createUser,
+  SignIn,
+  SignUp,
   updateUser,
   deleteUser,
   getUser,
   getUsers,
   getUsersByRole,
 } from "../../controllers/users/UserControl";
-import { validateUser } from "../../middleware/validate";
+import { validateUser, validateSignIn } from "../../middleware/validate";
 
 const router = Router();
 
 router.get("/getUser/:id", getUser);
 
-router.post("/createUser", validateUser, createUser);
+router.post("/SignUp", validateUser, SignUp);
+
+router.post("/SignIn", validateSignIn, SignIn);
 
 router.put("/updateUser/:id", validateUser, updateUser);
 

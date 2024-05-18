@@ -1,7 +1,4 @@
 import Joi from "joi";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient({ errorFormat: "pretty" });
 
 import {
   DiagnosticTestsAndMonitoring,
@@ -118,4 +115,26 @@ const depSchema = Joi.object({
   }),
 });
 
-export { depSchema, userSchema, programValidation, allergiesValidation };
+const signSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "any.required": "Email is required.",
+    "string.empty": "Email cannot be empty.",
+    "string.email": "Invalid email format.",
+  }),
+  password: Joi.string()
+    .pattern(new RegExp("^[a-zA-Z0-9]{8,12}$"))
+    .required()
+    .messages({
+      "string.pattern.base": `Password should be between 8 to 12 characters and contain letters or numbers only`,
+      "string.empty": `Password cannot be empty`,
+      "any.required": `Password is required`,
+    }),
+});
+
+export {
+  depSchema,
+  userSchema,
+  programValidation,
+  allergiesValidation,
+  signSchema,
+};

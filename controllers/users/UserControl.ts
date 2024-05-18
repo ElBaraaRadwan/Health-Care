@@ -3,10 +3,50 @@ import { Stringify } from "../../lib/Helper";
 import handleError from "../../lib/handleError";
 import { hashPassword } from "../../lib/passwordHash";
 import { $Enums, PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient({ errorFormat: "pretty" });
 
-const createUser = async (req: Request, res: Response): Promise<void> => {
+const SignIn = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, password } = await req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      res.status(400).json({ message: "email is not found" });
+    } else {
+      const match = await bcrypt.compare(password, user.passwordHash);
+
+      if (match) {
+        const token = jwt.sign(
+          { _id: user.id, role: user.role },
+          process.env.SECRET_TOKEN || "testToken",
+          {
+            expiresIn: "1h",
+          }
+        );
+
+        res.status(200).json({
+          message: "success",
+          token,
+          data: {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          },
+        });
+      } else {
+        res.status(400).json({ message: "incorrect password" });
+      }
+    }
+  } catch (error) {
+    const err: Error = error as Error;
+    handleError(err, res);
+  }
+};
+
+const SignUp = async (req: Request, res: Response): Promise<void> => {
   try {
     const body = await req.body;
     const checkIfExists = await prisma.user.findUnique({
@@ -203,7 +243,8 @@ const getUsersByRole = async (req: Request, res: Response): Promise<void> => {
 };
 
 export {
-  createUser,
+  SignUp,
+  SignIn,
   updateUser,
   deleteUser,
   getUser,
